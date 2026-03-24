@@ -1,0 +1,15 @@
+---
+- name: Paquetes base (build, Git, herramientas)
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - curl
+      - git
+      - vim
+      - htop
+      - ca-certificates
+      - gnupg
+      - build-essential
+      - python3
+    state: present
+    update_cache: false

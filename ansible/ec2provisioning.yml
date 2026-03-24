@@ -1,0 +1,33 @@
+---
+# Transportes Flores Vargas — servidor para front Vue y API Nest (TypeScript/JavaScript).
+# Inventario: generar con `terraform apply` (incluye tfv_rds_*). Secretos: ansible/vault.yml
+- name: Aprovisionar EC2 (Docker + Node + .env)
+  hosts: production
+  vars_files:
+    - vault.yml
+  become: true
+  pre_tasks:
+    - name: Comprobar variables de inventario (Terraform)
+      ansible.builtin.assert:
+        that:
+          - tfv_rds_host is defined
+          - tfv_rds_port is defined
+          - tfv_rds_dbname is defined
+        fail_msg: >-
+          Falta tfv_rds_* en el inventario. Ejecuta terraform apply y usa ansible/ansible_inventory generado.
+
+    - name: Comprobar secretos en vault
+      ansible.builtin.assert:
+        that:
+          - tfv_db_user is defined
+          - tfv_db_password is defined
+          - tfv_jwt_secret is defined
+        fail_msg: >-
+          Define tfv_db_user, tfv_db_password y tfv_jwt_secret en vault.yml (ver vault.example.yml).
+
+  roles:
+    - basic_setup
+    - update_os
+    - nodejs
+    - app_env
+    - docker

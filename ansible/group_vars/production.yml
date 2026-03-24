@@ -1,0 +1,10 @@
+---
+# Transportes Flores Vargas — valores no secretos (secretos en vault.yml)
+aws_region: us-east-1
+nodejs_major_version: "20"
+
+# URL pública del API que verá el front (ajusta tras el despliegue)
+tfv_public_api_url: "http://localhost:3000"
+
+# Si true, copia config de Prometheus/Grafana bajo /opt/app/config
+tfv_copy_monitoring_config: false

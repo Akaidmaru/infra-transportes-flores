@@ -1,0 +1,19 @@
+---
+# .env para Docker Compose (Nest lee variables al arrancar el contenedor)
+- name: Asegurar directorio de la aplicación
+  ansible.builtin.file:
+    path: /opt/app
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+  become: true
+
+- name: Plantilla .env (RDS desde inventario Terraform + secretos en vault)
+  ansible.builtin.template:
+    src: env.j2
+    dest: /opt/app/.env
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+  become: true
