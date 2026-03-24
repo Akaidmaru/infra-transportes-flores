@@ -1,5 +1,5 @@
 ---
-# Copia a vault.yml y cifra: ansible-vault encrypt vault.yml
+# Stack solo JS/TS (Nest + Vue). Copia a vault.yml y cifra: ansible-vault encrypt vault.yml
 # Valores de ejemplo — reemplaza antes de producción.
 
 # Deben coincidir con el usuario/contraseña de RDS (Terraform: db_username / db_password)

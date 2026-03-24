@@ -1,5 +1,5 @@
 ---
-# Transportes Flores Vargas — valores no secretos (secretos en vault.yml)
+# Transportes Flores Vargas — Vue + Nest (Node). Secretos en vault.yml.
 aws_region: us-east-1
 nodejs_major_version: "20"
 

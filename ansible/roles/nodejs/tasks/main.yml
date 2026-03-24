@@ -1,5 +1,5 @@
 ---
-# Node.js LTS para builds locales, herramientas TS/JS y node-gyp (Nest/Vue)
+# Node.js LTS — único runtime de aplicación en servidor (Nest/Vue/TS); no hay JDK.
 - name: Crear directorio keyrings
   ansible.builtin.file:
     path: /etc/apt/keyrings

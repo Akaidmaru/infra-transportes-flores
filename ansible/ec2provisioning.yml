@@ -1,7 +1,7 @@
 ---
-# Transportes Flores Vargas — servidor para front Vue y API Nest (TypeScript/JavaScript).
-# Inventario: generar con `terraform apply` (incluye tfv_rds_*). Secretos: ansible/vault.yml
-- name: Aprovisionar EC2 (Docker + Node + .env)
+# Transportes Flores Vargas — runtime solo Node.js: Vue + Nest (TypeScript/JavaScript). Sin Java.
+# Inventario: terraform apply → ansible_inventory. Secretos: vault.yml
+- name: Aprovisionar EC2 para Vue + Nest (Docker, Node LTS, .env)
   hosts: production
   vars_files:
     - vault.yml

@@ -1,5 +1,6 @@
-# Transportes Flores Vargas — Vue (front) + Nest (API). Imágenes: sustituye por tus GHCR/registry.
-# Variables en /opt/app/.env (Ansible roles app_env + vault)
+# Transportes Flores Vargas — stack solo JS/TS: Vue (front estático en nginx) + NestJS (API).
+# Sin Java/JVM. Imágenes: sustituye TFV_* por tu registry.
+# Puertos en el host: 8080 → front, 3000 → API Nest. Variables: /opt/app/.env (Ansible + vault).
 
 services:
   frontend:

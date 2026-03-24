@@ -1,6 +1,6 @@
 resource "aws_security_group" "ec2" {
   name        = "tfv-ec2-sg"
-  description = "SSH, HTTP/S y app desde Internet; tráfico saliente libre"
+  description = "TFV: SSH 22, Vue/nginx 8080, Nest 3000, HTTP/S; stack Node (sin JVM)"
   vpc_id      = aws_vpc.main.id
 
   tags = {

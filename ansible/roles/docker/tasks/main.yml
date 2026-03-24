@@ -1,4 +1,5 @@
 ---
+# Contenedores: imágenes Node (Nest) + nginx (Vue build). Sin JVM.
 - name: Directorio keyrings (Docker)
   ansible.builtin.file:
     path: /etc/apt/keyrings

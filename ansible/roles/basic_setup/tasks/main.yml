@@ -1,4 +1,5 @@
 ---
+# python3/build-essential: dependencias nativas de npm (node-gyp), no Java.
 - name: Paquetes base (build, Git, herramientas)
   ansible.builtin.apt:
     name:
