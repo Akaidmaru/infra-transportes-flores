@@ -54,13 +54,3 @@
     group: ubuntu
     mode: "0644"
   become: true
-
-- name: Copiar configuración opcional de monitoreo
-  ansible.builtin.copy:
-    src: ../../../../docker/config/
-    dest: /opt/app/config/
-    owner: ubuntu
-    group: ubuntu
-    mode: "0644"
-  become: true
-  when: tfv_copy_monitoring_config | bool
