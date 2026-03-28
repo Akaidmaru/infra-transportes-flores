@@ -26,7 +26,7 @@ resource "aws_db_instance" "main" {
 
   publicly_accessible          = var.rds_publicly_accessible
   multi_az                     = false
-  backup_retention_period      = 7
+  backup_retention_period      = var.db_backup_retention_period
   skip_final_snapshot          = true
   deletion_protection          = false
   apply_immediately            = true

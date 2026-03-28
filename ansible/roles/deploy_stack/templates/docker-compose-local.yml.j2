@@ -1,0 +1,47 @@
+# Deploy manual: build desde código fuente en EC2. Sin GHCR.
+# Redis + Backend (build) + Frontend (build con URL del API).
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - tfv-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  backend:
+    build:
+      context: /home/ubuntu/apps/Muni-backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - tfv-network
+
+  frontend:
+    build:
+      context: /home/ubuntu/apps/Muni-front
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: "{{ tfv_public_api_url }}"
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - tfv-network
+
+networks:
+  tfv-network:
+    driver: bridge

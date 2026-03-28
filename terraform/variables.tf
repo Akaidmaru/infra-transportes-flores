@@ -5,8 +5,14 @@ variable "aws_region" {
 }
 
 variable "keypair_name" {
-  description = "Nombre del key pair para SSH (archivo ../keypairs/<nombre>.pem)"
+  description = "Nombre del key pair para SSH (archivo <ssh_pem_relative_dir>/<nombre>.pem en la raíz del repo)"
   type        = string
+}
+
+variable "ssh_pem_relative_dir" {
+  description = "Carpeta en la raíz del repo infra donde está el .pem (Ansible usa ../<dir>/ desde ansible/). Ej.: keypair o keypairs"
+  type        = string
+  default     = "keypairs"
 }
 
 variable "vpc_cidr" {
@@ -40,9 +46,9 @@ variable "availability_zone_b" {
 }
 
 variable "instance_type" {
-  description = "EC2 (p. ej. t2.micro para free tier)"
+  description = "EC2. En cuentas solo Free Tier suele aceptarse t3.micro (t2.micro a veces ya no es elegible)."
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "ami_id" {
@@ -87,6 +93,12 @@ variable "db_instance_class" {
   default     = "db.t3.micro"
 }
 
+variable "db_backup_retention_period" {
+  description = "Días de retención de backups automáticos. En cuenta AWS Free Tier suele exigirse 0 (sin backups continuos PITR)."
+  type        = number
+  default     = 0
+}
+
 variable "rds_publicly_accessible" {
   description = "Si es true, el endpoint RDS es alcanzable desde Internet (además del SG)"
   type        = bool
@@ -103,4 +115,14 @@ variable "rds_allow_ipv6" {
   description = "Permitir PostgreSQL desde ::/0"
   type        = bool
   default     = true
+}
+
+variable "tfv_backend_image" {
+  description = "Imagen Docker del API en GHCR (minúsculas), p. ej. ghcr.io/org/muni-backend:latest"
+  type        = string
+}
+
+variable "tfv_frontend_image" {
+  description = "Imagen Docker del front en GHCR (minúsculas), p. ej. ghcr.io/org/muni-frontend:latest"
+  type        = string
 }

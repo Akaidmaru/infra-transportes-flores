@@ -3,6 +3,16 @@ output "ec2_public_ip" {
   value       = aws_instance.production.public_ip
 }
 
+output "tfv_public_api_url" {
+  description = "URL base del API (HTTP demo; mismo valor que inyecta Ansible en el .env)"
+  value       = "http://${aws_instance.production.public_ip}:3000"
+}
+
+output "tfv_frontend_url" {
+  description = "URL del front nginx (HTTP demo)"
+  value       = "http://${aws_instance.production.public_ip}:8080"
+}
+
 output "ec2_id" {
   description = "ID de la instancia EC2"
   value       = aws_instance.production.id

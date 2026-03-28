@@ -1,7 +1,13 @@
 ---
-# Transportes Flores Vargas — Vue + Nest (Node). Secretos en vault.yml.
+# Valores fijos de la app. URLs de API/CORS e imágenes Docker vienen del inventario
+# generado por Terraform (ansible_inventory); no hace falta repetir la IP aquí.
 aws_region: us-east-1
 nodejs_major_version: "20"
 
-# URL pública del API que verá el front (ajusta tras el despliegue)
-tfv_public_api_url: "http://localhost:3000"
+# TTL del código de verificación (segundos)
+tfv_verification_code_ttl: 600
+
+# URLs de repositorios Git para clonar en la EC2 (deploy manual sin GHCR)
+tfv_backend_repo: "https://github.com/LuisaVargas-9/Muni-backend.git"
+tfv_frontend_repo: "https://github.com/LuisaVargas-9/Muni-front.git"
+tfv_repo_branch: "main"

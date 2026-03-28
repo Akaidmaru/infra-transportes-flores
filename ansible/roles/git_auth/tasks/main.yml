@@ -1,0 +1,60 @@
+---
+# Configuración de acceso a repos privados de GitHub.
+# Si las credenciales ya están configuradas manualmente, las usa; si no, las crea desde vault.
+
+- name: Verificar si Git ya está configurado con credential helper
+  ansible.builtin.shell:
+    cmd: git config --global --get credential.helper
+  become: true
+  become_user: ubuntu
+  register: git_helper
+  ignore_errors: true
+
+- name: Verificar si .git-credentials ya existe y tiene contenido
+  ansible.builtin.stat:
+    path: /home/ubuntu/.git-credentials
+  become: true
+  become_user: ubuntu
+  register: creds_file
+
+- name: Probar acceso a GitHub con credenciales existentes
+  ansible.builtin.shell:
+    cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
+  become: true
+  become_user: ubuntu
+  register: git_test_existing
+  ignore_errors: true
+  when: creds_file.stat.exists and creds_file.stat.size > 0
+
+- name: Credenciales ya funcionan (configuradas manualmente)
+  ansible.builtin.debug:
+    msg: "✓ Credenciales Git ya configuradas y funcionando"
+  when: git_test_existing is defined and git_test_existing.rc == 0
+
+- name: Crear/actualizar credencial de GitHub desde vault
+  ansible.builtin.copy:
+    content: "https://{{ tfv_github_username }}:{{ tfv_github_token }}@github.com\n"
+    dest: /home/ubuntu/.git-credentials
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+  become: true
+  when: git_test_existing is not defined or git_test_existing.rc != 0
+
+- name: Configurar Git para usar credenciales
+  ansible.builtin.shell:
+    cmd: git config --global credential.helper store
+  become: true
+  become_user: ubuntu
+  when: git_helper.rc != 0 or git_helper.stdout != 'store'
+
+- name: Verificar acceso final a GitHub
+  ansible.builtin.shell:
+    cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
+  become: true
+  become_user: ubuntu
+  register: git_test_final
+
+- name: Mostrar resultado de verificación GitHub
+  ansible.builtin.debug:
+    msg: "✓ Acceso a repos privados verificado (HEAD: {{ git_test_final.stdout.split()[0] }})"

@@ -1,5 +1,10 @@
 ---
 # python3/build-essential: dependencias nativas de npm (node-gyp), no Java.
+- name: Actualizar cache de APT
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
 - name: Paquetes base (build, Git, herramientas)
   ansible.builtin.apt:
     name:
@@ -13,4 +18,3 @@
       - build-essential
       - python3
     state: present
-    update_cache: false

@@ -1,17 +1,24 @@
 ---
-# Stack solo JS/TS (Nest + Vue). Copia a vault.yml y cifra: ansible-vault encrypt vault.yml
+# Copia a vault.yml y cifra: ansible-vault encrypt vault.yml
 # Valores de ejemplo — reemplaza antes de producción.
 
 # Deben coincidir con el usuario/contraseña de RDS (Terraform: db_username / db_password)
 tfv_db_user: "tfvadmin"
 tfv_db_password: "cambiar_por_la_misma_que_terraform"
 
-# Nest / JWT y similares
+# Nest / JWT
 tfv_jwt_secret: "genera_un_secreto_largo_aleatorio"
 
-# Opcional: bucket S3 (si no lo pones, usa el output de terraform apply)
-# tfv_s3_bucket: "transportes-flores-vargas-123456789012-app"
+# Acceso a repositorios privados de GitHub (Personal Access Token)
+# Genera el token en: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+# Permisos necesarios: repo (Full control of private repositories)
+tfv_github_username: "tu-usuario-github"
+tfv_github_token: "ghp_tu_token_personal_de_github"
 
-# Opcional
+# Opcional: Brevo (emails de verificación)
+# tfv_brevo_api_key: ""
+# tfv_brevo_sender_email: "noreply@tudominio.com"
+# tfv_brevo_sender_name: "Transportes Flores Vargas"
+
+# Opcional: Google Maps (rutas)
 # tfv_google_maps_api_key: ""
-# tfv_smtp_password: ""

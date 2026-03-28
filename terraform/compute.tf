@@ -20,12 +20,15 @@ resource "aws_instance" "production" {
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/ansible_inventory.tpl", {
-    production_ip    = aws_instance.production.public_ip
-    ssh_user         = "ubuntu"
-    private_key_path = "../keypairs/${var.keypair_name}.pem"
-    rds_address      = aws_db_instance.main.address
-    rds_port         = tostring(aws_db_instance.main.port)
-    db_name          = aws_db_instance.main.db_name
+    production_ip       = aws_instance.production.public_ip
+    ssh_user            = "ubuntu"
+    private_key_path    = "../${var.ssh_pem_relative_dir}/${var.keypair_name}.pem"
+    rds_address         = aws_db_instance.main.address
+    rds_port            = tostring(aws_db_instance.main.port)
+    db_name             = aws_db_instance.main.db_name
+    s3_bucket           = aws_s3_bucket.app.id
+    tfv_backend_image   = var.tfv_backend_image
+    tfv_frontend_image  = var.tfv_frontend_image
   })
   filename             = "../ansible/ansible_inventory"
   file_permission      = "0644"
