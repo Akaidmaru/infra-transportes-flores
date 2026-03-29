@@ -1,0 +1,81 @@
+# docker-compose.yml generado por Ansible (deploy con GHCR)
+# Usa imágenes pre-compiladas desde GitHub Container Registry
+
+services:
+  backend:
+    image: {{ tfv_backend_image }}
+    container_name: app-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: "postgresql://{{ tfv_db_user }}:{{ tfv_db_password }}@{{ tfv_rds_host }}:{{ tfv_rds_port }}/{{ tfv_rds_dbname }}?schema=public"
+      JWT_SECRET: "{{ tfv_jwt_secret }}"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGIN: "{{ tfv_cors_origin }}"
+      AWS_S3_BUCKET_NAME: "{{ tfv_s3_bucket }}"
+      AWS_REGION: us-east-1
+{% if tfv_brevo_api_key is defined and tfv_brevo_api_key | length > 0 %}
+      BREVO_API_KEY: "{{ tfv_brevo_api_key }}"
+      BREVO_SENDER_EMAIL: "{{ tfv_brevo_sender_email | default('noreply@example.com') }}"
+      BREVO_SENDER_NAME: "{{ tfv_brevo_sender_name | default('Transportes Flores Vargas') }}"
+{% endif %}
+{% if tfv_google_maps_api_key is defined and tfv_google_maps_api_key | length > 0 %}
+      GOOGLE_MAPS_API_KEY: "{{ tfv_google_maps_api_key }}"
+{% endif %}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/api-docs',r=>process.exit(r.statusCode===200||r.statusCode===301||r.statusCode===302?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+  frontend:
+    image: {{ tfv_frontend_image }}
+    container_name: app-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: app-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 5
+    volumes:
+      - redis-data:/data
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

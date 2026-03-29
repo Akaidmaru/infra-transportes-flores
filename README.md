@@ -2,6 +2,17 @@
 
 Este repositorio define la infraestructura en **AWS** con **Terraform** y el aprovisionamiento de la instancia de cómputo con **Ansible**. La aplicación (Vue + NestJS) se ejecuta en **Docker Compose** sobre una **EC2**; la base de datos es **RDS PostgreSQL**; hay un bucket **S3** para datos de la app.
 
+## 📦 Repositorios del proyecto
+
+- **🏗️ Infraestructura**: https://github.com/Akaidmaru/infra-transportes-flores
+- **🔧 Backend (NestJS)**: https://github.com/Akaidmaru/Muni-backend-deploy
+- **🎨 Frontend (Vue)**: https://github.com/Akaidmaru/Muni-frontend-deploy
+
+## 📚 Guías de despliegue
+
+- **[DEPLOY-GHCR.md](DEPLOY-GHCR.md)**: Deploy usando GitHub Container Registry ⚡ **RECOMENDADO**
+- **[DEPLOY-MANUAL-EC2.md](DEPLOY-MANUAL-EC2.md)**: Deploy manual compilando en EC2
+
 ## Qué se crea en AWS
 
 | Recurso | Rol |

@@ -1,0 +1,72 @@
+---
+# Deploy desde GHCR: usa imágenes pre-compiladas, solo pull + up
+
+- name: Verificar que docker está instalado
+  ansible.builtin.command: docker --version
+  register: docker_check
+  changed_when: false
+
+- name: Mostrar versión de Docker
+  ansible.builtin.debug:
+    msg: "Docker version: {{ docker_check.stdout }}"
+
+- name: Actualizar docker-compose.yml para usar imágenes GHCR
+  ansible.builtin.template:
+    src: docker-compose-ghcr.yml.j2
+    dest: /opt/app/docker-compose.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+  become: true
+
+- name: Parar contenedores existentes
+  ansible.builtin.command:
+    cmd: docker compose down
+    chdir: /opt/app
+  become: true
+  ignore_errors: true
+
+- name: Pull de imágenes desde GHCR (puede tardar 2-3 minutos)
+  ansible.builtin.shell:
+    cmd: docker compose pull
+    chdir: /opt/app
+    executable: /bin/bash
+  become: true
+  register: pull_result
+
+- name: Mostrar resultado del pull
+  ansible.builtin.debug:
+    var: pull_result.stdout_lines
+
+- name: Levantar stack con imágenes de GHCR
+  ansible.builtin.shell:
+    cmd: docker compose up -d --remove-orphans
+    chdir: /opt/app
+    executable: /bin/bash
+  become: true
+
+- name: Esperar a que los servicios estén listos
+  ansible.builtin.pause:
+    seconds: 20
+
+- name: Verificar estado de contenedores
+  ansible.builtin.command:
+    cmd: docker ps
+  become: true
+  register: docker_status
+
+- name: Mostrar estado de contenedores
+  ansible.builtin.debug:
+    var: docker_status.stdout_lines
+
+- name: Mostrar URLs de acceso
+  ansible.builtin.debug:
+    msg:
+      - "✓ Deploy completado desde GHCR"
+      - "Frontend: {{ tfv_cors_origin }}"
+      - "API: {{ tfv_public_api_url }}"
+      - "Swagger: {{ tfv_public_api_url }}/api-docs"
+      - ""
+      - "Imágenes usadas:"
+      - "  Backend: {{ tfv_backend_image }}"
+      - "  Frontend: {{ tfv_frontend_image }}"

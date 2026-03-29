@@ -1,0 +1,30 @@
+# cp terraform.tfvars.example terraform.tfvars
+
+# Debe existir en EC2 → Key pairs (misma región que var.aws_region). Si no existe, créalo o cambia el nombre.
+keypair_name = "tu-keypair"
+
+# Carpeta en la raíz del repo donde está <keypair_name>.pem (Ansible: ../<dir>/ desde ansible/)
+# ssh_pem_relative_dir = "keypairs"
+
+# Obligatoria para RDS
+db_password = "ContraseñaSeguraParaRDS123"
+
+# Imágenes publicadas en GHCR (usuario/org en minúsculas; deben coincidir con los workflows)
+tfv_backend_image  = "ghcr.io/tu-org/muni-backend:latest"
+tfv_frontend_image = "ghcr.io/tu-org/muni-frontend:latest"
+
+# Opcional
+# aws_region               = "us-east-1"
+# instance_type            = "t3.micro"
+# public_subnet_a_cidr     = "10.0.1.0/24"
+# public_subnet_b_cidr     = "10.0.2.0/24"
+# availability_zone_a      = "us-east-1a"
+# availability_zone_b      = "us-east-1b"
+# db_engine_version        = "16.4"
+# db_instance_class        = "db.t3.micro"
+# rds_publicly_accessible  = true
+# rds_ingress_cidr         = "0.0.0.0/0"
+# rds_allow_ipv6           = true
+# s3_bucket_suffix         = "app"
+# En Free Tier AWS: deja el default 0 o no definas db_backup_retention_period
+# db_backup_retention_period = 0
