@@ -8,6 +8,13 @@ resource "aws_instance" "production" {
   key_name                    = var.keypair_name
   iam_instance_profile        = aws_iam_instance_profile.ec2_app.name
 
+  root_block_device {
+    volume_size           = 20
+    volume_type           = "gp3"
+    delete_on_termination = true
+    encrypted             = false
+  }
+
   depends_on = [
     aws_route_table_association.public_a,
   ]
