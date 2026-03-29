@@ -9,5 +9,7 @@ tfv_verification_code_ttl: 600
 
 # URLs de repositorios Git para clonar en la EC2 (deploy manual sin GHCR)
 tfv_backend_repo: "https://github.com/LuisaVargas-9/Muni-backend.git"
+tfv_backend_branch: "feature/JMMB17"
+
 tfv_frontend_repo: "https://github.com/LuisaVargas-9/Muni-front.git"
-tfv_repo_branch: "main"
+tfv_frontend_branch: "refactor/structure"

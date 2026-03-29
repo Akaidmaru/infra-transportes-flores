@@ -25,20 +25,26 @@
   ansible.builtin.git:
     repo: "{{ tfv_backend_repo }}"
     dest: /home/ubuntu/apps/Muni-backend
-    version: "{{ tfv_repo_branch }}"
+    version: "{{ tfv_backend_branch }}"
     force: true
   become: true
   become_user: ubuntu
   when: not backend_repo.stat.exists
 
 - name: Actualizar repositorio backend (si ya existe)
-  ansible.builtin.command:
-    cmd: git pull origin {{ tfv_repo_branch }}
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      git fetch origin
+      git clean -fd
+      git reset --hard
+      git checkout {{ tfv_backend_branch }}
+      git pull origin {{ tfv_backend_branch }}
     chdir: /home/ubuntu/apps/Muni-backend
+    executable: /bin/bash
   become: true
   become_user: ubuntu
   when: backend_repo.stat.exists
-  ignore_errors: true
 
 - name: Verificar que repositorio frontend existe
   ansible.builtin.stat:
@@ -49,20 +55,26 @@
   ansible.builtin.git:
     repo: "{{ tfv_frontend_repo }}"
     dest: /home/ubuntu/apps/Muni-front
-    version: "{{ tfv_repo_branch }}"
+    version: "{{ tfv_frontend_branch }}"
     force: true
   become: true
   become_user: ubuntu
   when: not frontend_repo.stat.exists
 
 - name: Actualizar repositorio frontend (si ya existe)
-  ansible.builtin.command:
-    cmd: git pull origin {{ tfv_repo_branch }}
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      git fetch origin
+      git clean -fd
+      git reset --hard
+      git checkout {{ tfv_frontend_branch }}
+      git pull origin {{ tfv_frontend_branch }}
     chdir: /home/ubuntu/apps/Muni-front
+    executable: /bin/bash
   become: true
   become_user: ubuntu
   when: frontend_repo.stat.exists
-  ignore_errors: true
 
 - name: Copiar Dockerfile al backend
   ansible.builtin.copy:
