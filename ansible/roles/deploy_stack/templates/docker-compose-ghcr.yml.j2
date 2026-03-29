@@ -11,7 +11,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: "postgresql://{{ tfv_db_user }}:{{ tfv_db_password }}@{{ tfv_rds_host }}:{{ tfv_rds_port }}/{{ tfv_rds_dbname }}?schema=public&sslmode=require"
+      DATABASE_URL: "postgresql://{{ tfv_db_user }}:{{ tfv_db_password }}@{{ tfv_rds_host }}:{{ tfv_rds_port }}/{{ tfv_rds_dbname }}?schema=public&sslmode=require&sslaccept=accept_invalid_certs"
       JWT_SECRET: "{{ tfv_jwt_secret }}"
       REDIS_URL: "redis://redis:6379"
       REDIS_HOST: redis
