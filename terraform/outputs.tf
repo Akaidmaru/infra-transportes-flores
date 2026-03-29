@@ -9,8 +9,8 @@ output "tfv_public_api_url" {
 }
 
 output "tfv_frontend_url" {
-  description = "URL del front nginx (HTTP demo)"
-  value       = "http://${aws_instance.production.public_ip}:8080"
+  description = "URL del front nginx (HTTP estándar, puerto 80)"
+  value       = "http://${aws_instance.production.public_ip}"
 }
 
 output "ec2_id" {

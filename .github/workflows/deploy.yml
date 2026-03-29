@@ -1,0 +1,71 @@
+name: Deploy to EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_mode:
+        description: 'Modo de deploy (ghcr o local)'
+        required: false
+        default: 'ghcr'
+        type: choice
+        options:
+          - ghcr
+          - local
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy docker-compose.yml to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            ansible/roles/deploy_stack/templates/docker-compose-${{ github.event.inputs.deploy_mode || 'ghcr' }}.yml.j2 \
+            ubuntu@${{ secrets.EC2_HOST }}:/tmp/docker-compose.tmp.yml
+
+      - name: Process template and deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          set -e
+          
+          # Procesar template manualmente (reemplazar variables Ansible)
+          sed -e "s|{{ tfv_backend_image }}|${{ vars.BACKEND_IMAGE }}|g" \
+              -e "s|{{ tfv_frontend_image }}|${{ vars.FRONTEND_IMAGE }}|g" \
+              -e "s|{{ tfv_db_user }}|${{ secrets.DB_USER }}|g" \
+              -e "s|{{ tfv_db_password }}|${{ secrets.DB_PASSWORD }}|g" \
+              -e "s|{{ tfv_rds_host }}|${{ secrets.RDS_HOST }}|g" \
+              -e "s|{{ tfv_rds_port }}|${{ secrets.RDS_PORT }}|g" \
+              -e "s|{{ tfv_rds_dbname }}|${{ secrets.RDS_DBNAME }}|g" \
+              -e "s|{{ tfv_jwt_secret }}|${{ secrets.JWT_SECRET }}|g" \
+              -e "s|{{ tfv_cors_origin }}|http://${{ secrets.EC2_HOST }}|g" \
+              -e "s|{{ tfv_s3_bucket }}|${{ secrets.S3_BUCKET }}|g" \
+              -e "s|{{ tfv_public_api_url }}|http://${{ secrets.EC2_HOST }}:3000|g" \
+              /tmp/docker-compose.tmp.yml > /opt/app/docker-compose.yml
+          
+          # Deploy
+          cd /opt/app
+          sudo docker compose down
+          sudo docker compose pull
+          sudo docker compose up -d --remove-orphans
+          
+          echo "✅ Deploy completado"
+          sudo docker ps
+          EOF
+
+      - name: Show deployment URLs
+        run: |
+          echo "✅ Deploy completado en EC2"
+          echo "Frontend: http://${{ secrets.EC2_HOST }}"
+          echo "API: http://${{ secrets.EC2_HOST }}:3000"
+          echo "Swagger: http://${{ secrets.EC2_HOST }}:3000/api-docs"
