@@ -8,10 +8,39 @@ Este repositorio define la infraestructura en **AWS** con **Terraform** y el apr
 - **🔧 Backend (NestJS)**: https://github.com/Akaidmaru/Muni-backend-deploy
 - **🎨 Frontend (Vue)**: https://github.com/Akaidmaru/Muni-frontend-deploy
 
+## 🚀 Flujo de Deploy Automatizado (RECOMENDADO)
+
+### **Desarrollo diario:**
+
+1. **Haz cambios** en backend o frontend
+2. **Push** a las ramas correspondientes:
+   ```bash
+   git push origin feature/JMMB17  # backend
+   git push origin refactor/structure  # frontend
+   ```
+3. **GitHub Actions compila automáticamente** (2-3 min)
+4. **Deploy desde GitHub**:
+   - Ve a https://github.com/Akaidmaru/infra-transportes-flores/actions
+   - Click **"Auto-Deploy on Image Update"** → **"Run workflow"**
+   - Espera 1-2 min
+5. ✅ **Aplicación desplegada**
+
+**📖 Guía completa**: [FLUJO-AUTOMATIZADO.md](FLUJO-AUTOMATIZADO.md)
+
+---
+
 ## 📚 Guías de despliegue
 
-- **[DEPLOY-GHCR.md](DEPLOY-GHCR.md)**: Deploy usando GitHub Container Registry ⚡ **RECOMENDADO**
-- **[DEPLOY-MANUAL-EC2.md](DEPLOY-MANUAL-EC2.md)**: Deploy manual compilando en EC2
+### **Flujos disponibles:**
+
+| Guía | Uso | Velocidad | Complejidad |
+|------|-----|-----------|-------------|
+| **[FLUJO-AUTOMATIZADO.md](FLUJO-AUTOMATIZADO.md)** | Deploy diario | ⚡ Rápido (2-3 min) | ✅ Simple (click en GitHub) |
+| **[DEPLOY-GHCR.md](DEPLOY-GHCR.md)** | Deploy con Ansible + GHCR | 🚀 Rápido (2-3 min) | 📘 Requiere Ansible local |
+| **[DEPLOY-GITHUB-ACTIONS.md](DEPLOY-GITHUB-ACTIONS.md)** | Deploy con GitHub Actions | ⚡ Rápido (1-2 min) | ✅ Simple (click en GitHub) |
+| **[DEPLOY-MANUAL-EC2.md](DEPLOY-MANUAL-EC2.md)** | Compilación local en EC2 | 🐌 Lento (60+ min) | 🔧 Debugging/troubleshooting |
+
+**Recomendación**: Usa **FLUJO-AUTOMATIZADO** para desarrollo diario.
 
 ## Qué se crea en AWS
 

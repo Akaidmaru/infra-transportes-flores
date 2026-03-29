@@ -1,18 +1,13 @@
-name: Deploy to EC2
+name: Auto-Deploy on Image Update
 
 on:
+  # Se dispara manualmente o cuando recibes un webhook de los repos de apps
   workflow_dispatch:
-    inputs:
-      deploy_backend:
-        description: 'Redesplegar backend'
-        required: false
-        default: 'true'
-        type: boolean
-      deploy_frontend:
-        description: 'Redesplegar frontend'
-        required: false
-        default: 'true'
-        type: boolean
+  repository_dispatch:
+    types: [backend-published, frontend-published]
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -111,50 +106,53 @@ jobs:
           scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
             docker-compose.yml ubuntu@${{ secrets.EC2_HOST }}:/tmp/docker-compose.yml
 
-      - name: Deploy services on EC2
+      - name: Deploy on EC2
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
           set -e
           
-          # Mover docker-compose a la ubicación correcta
           sudo mv /tmp/docker-compose.yml /opt/app/docker-compose.yml
           sudo chown ubuntu:ubuntu /opt/app/docker-compose.yml
           
           cd /opt/app
           
-          # Determinar qué servicios redesplegar
-          SERVICES=""
-          ${{ github.event.inputs.deploy_backend == 'true' }} && SERVICES="$SERVICES backend"
-          ${{ github.event.inputs.deploy_frontend == 'true' }} && SERVICES="$SERVICES frontend"
+          echo "🔄 Pulling latest images..."
+          sudo docker compose pull
           
-          # Si no se especificó nada, redesplegar todo
-          if [ -z "$SERVICES" ]; then
-            SERVICES="backend frontend redis"
-          fi
+          echo "🚀 Redeploying services..."
+          sudo docker compose up -d --remove-orphans
           
-          echo "🔄 Desplegando servicios: $SERVICES"
-          
-          # Pull de imágenes (solo las necesarias)
-          sudo docker compose pull $SERVICES
-          
-          # Redesplegar servicios
-          sudo docker compose up -d $SERVICES
-          
-          echo "✅ Deploy completado"
           echo ""
-          echo "📊 Estado de contenedores:"
+          echo "⏳ Waiting for services to be healthy..."
+          sleep 15
+          
+          echo ""
+          echo "📊 Container status:"
           sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          
+          echo ""
+          echo "✅ Deploy completed successfully!"
           EOF
 
-      - name: Show deployment info
+      - name: Generate deployment summary
         run: |
-          echo "## ✅ Deploy Completado" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Deploy Completado Exitosamente" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URLs de acceso:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend: http://${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
-          echo "- API: http://${{ secrets.EC2_HOST }}:3000" >> $GITHUB_STEP_SUMMARY
-          echo "- Swagger: http://${{ secrets.EC2_HOST }}:3000/api-docs" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌐 URLs de Acceso" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Imágenes desplegadas:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Backend: \`${{ vars.BACKEND_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend: \`${{ vars.FRONTEND_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "| Servicio | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | http://${{ secrets.EC2_HOST }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| API | http://${{ secrets.EC2_HOST }}:3000 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Swagger | http://${{ secrets.EC2_HOST }}:3000/api-docs |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🐳 Imágenes Desplegadas" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Componente | Imagen |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | \`${{ vars.BACKEND_IMAGE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | \`${{ vars.FRONTEND_IMAGE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Redis | \`redis:7-alpine\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⏱️ Deploy Time" >> $GITHUB_STEP_SUMMARY
+          echo "Completado en ~1-2 minutos" >> $GITHUB_STEP_SUMMARY
