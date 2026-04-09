@@ -12,6 +12,9 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      BACKEND_IMAGE: ghcr.io/akaidmaru/muni-backend-deploy:latest
+      FRONTEND_IMAGE: ghcr.io/akaidmaru/muni-frontend-deploy:latest
     
     steps:
       - name: Checkout infra repo
@@ -26,23 +29,15 @@ jobs:
 
       - name: Debug - Verificar variables
         run: |
-          echo "BACKEND_IMAGE: '${{ vars.BACKEND_IMAGE }}'"
-          echo "FRONTEND_IMAGE: '${{ vars.FRONTEND_IMAGE }}'"
-          if [ -z "${{ vars.BACKEND_IMAGE }}" ]; then
-            echo "::error::BACKEND_IMAGE está vacía"
-            exit 1
-          fi
-          if [ -z "${{ vars.FRONTEND_IMAGE }}" ]; then
-            echo "::error::FRONTEND_IMAGE está vacía"
-            exit 1
-          fi
+          echo "BACKEND_IMAGE: '${{ env.BACKEND_IMAGE }}'"
+          echo "FRONTEND_IMAGE: '${{ env.FRONTEND_IMAGE }}'"
 
       - name: Create docker-compose.yml
         run: |
           cat > docker-compose.yml << 'COMPOSE_EOF'
           services:
             backend:
-              image: ${{ vars.BACKEND_IMAGE }}
+              image: ${{ env.BACKEND_IMAGE }}
               container_name: app-backend
               restart: unless-stopped
               ports:
@@ -81,7 +76,7 @@ jobs:
                 retries: 3
 
             frontend:
-              image: ${{ vars.FRONTEND_IMAGE }}
+              image: ${{ env.FRONTEND_IMAGE }}
               container_name: app-frontend
               restart: unless-stopped
               ports:
