@@ -6,6 +6,8 @@ nodejs_major_version: "20"
 
 # TTL del código de verificación (segundos)
 tfv_verification_code_ttl: 600
+tfv_verification_rate_limit_seconds: 60
+tfv_aws_s3_signed_url_ttl: 3600
 
 # URLs de repositorios Git (no se usan para deploy, solo referencia)
 tfv_backend_repo: "https://github.com/Akaidmaru/Muni-backend-deploy.git"

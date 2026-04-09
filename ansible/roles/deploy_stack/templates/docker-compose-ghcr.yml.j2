@@ -18,8 +18,13 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CORS_ORIGIN: "{{ tfv_cors_origin }}"
-      AWS_S3_BUCKET_NAME: "{{ tfv_s3_bucket }}"
-      AWS_REGION: us-east-1
+      VERIFICATION_CODE_TTL: "{{ tfv_verification_code_ttl | default(600) }}"
+      VERIFICATION_RATE_LIMIT_SECONDS: "{{ tfv_verification_rate_limit_seconds | default(60) }}"
+      AWS_REGION: "{{ aws_region | default('us-east-1') }}"
+      AWS_ACCESS_KEY_ID: "{{ tfv_aws_access_key_id }}"
+      AWS_SECRET_ACCESS_KEY: "{{ tfv_aws_secret_access_key }}"
+      AWS_S3_BUCKET: "{{ tfv_s3_bucket }}"
+      AWS_S3_SIGNED_URL_TTL: "{{ tfv_aws_s3_signed_url_ttl | default(3600) }}"
 {% if tfv_brevo_api_key is defined and tfv_brevo_api_key | length > 0 %}
       BREVO_API_KEY: "{{ tfv_brevo_api_key }}"
       BREVO_SENDER_EMAIL: "{{ tfv_brevo_sender_email | default('noreply@example.com') }}"

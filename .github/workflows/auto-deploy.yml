@@ -43,9 +43,18 @@ jobs:
                 REDIS_URL: "redis://redis:6379"
                 REDIS_HOST: redis
                 REDIS_PORT: 6379
-                CORS_ORIGIN: "http://${{ secrets.EC2_HOST }}"
-                AWS_S3_BUCKET_NAME: "${{ secrets.S3_BUCKET }}"
+                CORS_ORIGIN: "${{ secrets.CORS_ORIGIN }}"
+                VERIFICATION_CODE_TTL: "600"
+                VERIFICATION_RATE_LIMIT_SECONDS: "60"
+                GOOGLE_MAPS_API_KEY: "${{ secrets.GOOGLE_MAPS_API_KEY }}"
+                BREVO_API_KEY: "${{ secrets.BREVO_API_KEY }}"
+                BREVO_SENDER_EMAIL: "${{ secrets.BREVO_SENDER_EMAIL }}"
+                BREVO_SENDER_NAME: "${{ secrets.BREVO_SENDER_NAME }}"
                 AWS_REGION: us-east-1
+                AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+                AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+                AWS_S3_BUCKET: "${{ secrets.S3_BUCKET }}"
+                AWS_S3_SIGNED_URL_TTL: "3600"
               depends_on:
                 redis:
                   condition: service_healthy

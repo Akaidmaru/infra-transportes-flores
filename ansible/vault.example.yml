@@ -20,5 +20,10 @@ tfv_github_token: "ghp_tu_token_personal_de_github"
 # tfv_brevo_sender_email: "noreply@tudominio.com"
 # tfv_brevo_sender_name: "Transportes Flores Vargas"
 
-# Opcional: Google Maps (rutas)
+# Opcional: Google Maps (rutas; front en build local también usa map ID)
 # tfv_google_maps_api_key: ""
+# tfv_google_maps_map_id: "DEMO_MAP_ID"
+
+# IAM (acceso programático a S3; el backend Nest usa estas variables)
+tfv_aws_access_key_id: "AKIA..."
+tfv_aws_secret_access_key: "..."

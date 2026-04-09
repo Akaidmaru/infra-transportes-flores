@@ -34,6 +34,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: "{{ tfv_public_api_url }}"
+        VITE_GOOGLE_MAPS_API_KEY: "{{ tfv_google_maps_api_key | default('') }}"
+        VITE_GOOGLE_MAPS_MAP_ID: "{{ tfv_google_maps_map_id | default('DEMO_MAP_ID') }}"
     restart: unless-stopped
     ports:
       - "80:80"
