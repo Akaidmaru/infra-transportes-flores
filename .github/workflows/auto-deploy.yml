@@ -24,6 +24,19 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Debug - Verificar variables
+        run: |
+          echo "BACKEND_IMAGE: '${{ vars.BACKEND_IMAGE }}'"
+          echo "FRONTEND_IMAGE: '${{ vars.FRONTEND_IMAGE }}'"
+          if [ -z "${{ vars.BACKEND_IMAGE }}" ]; then
+            echo "::error::BACKEND_IMAGE está vacía"
+            exit 1
+          fi
+          if [ -z "${{ vars.FRONTEND_IMAGE }}" ]; then
+            echo "::error::FRONTEND_IMAGE está vacía"
+            exit 1
+          fi
+
       - name: Create docker-compose.yml
         run: |
           cat > docker-compose.yml << 'COMPOSE_EOF'
