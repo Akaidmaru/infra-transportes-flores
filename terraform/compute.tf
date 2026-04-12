@@ -36,6 +36,7 @@ resource "local_file" "ansible_inventory" {
     s3_bucket           = aws_s3_bucket.app.id
     tfv_backend_image   = var.tfv_backend_image
     tfv_frontend_image  = var.tfv_frontend_image
+    app_domain          = var.app_domain
   })
   filename             = "../ansible/ansible_inventory"
   file_permission      = "0644"

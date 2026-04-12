@@ -1,30 +1,39 @@
-# cp terraform.tfvars.example terraform.tfvars
+# Variables para Terraform - Copia este archivo a terraform.tfvars y rellena los valores
 
-# Debe existir en EC2 → Key pairs (misma región que var.aws_region). Si no existe, créalo o cambia el nombre.
-keypair_name = "tu-keypair"
+# ====================
+# AWS y EC2
+# ====================
+aws_region = "us-east-1"
+keypair_name = "transportes_floresV"  # Nombre del .pem (sin extensión)
+ssh_pem_relative_dir = "keypair"      # Carpeta donde está el .pem
 
-# Carpeta en la raíz del repo donde está <keypair_name>.pem (Ansible: ../<dir>/ desde ansible/)
-# ssh_pem_relative_dir = "keypairs"
+# ====================
+# Base de Datos RDS
+# ====================
+db_username = "tfvadmin"
+db_password = "TU_PASSWORD_SEGURO_AQUI"  # CAMBIAR!
+db_engine_version = "16.4"
+db_instance_class = "db.t3.micro"
+db_allocated_storage = 20
+db_backup_retention_period = 0  # 0 para Free Tier
 
-# Obligatoria para RDS
-db_password = "ContraseñaSeguraParaRDS123"
+# ====================
+# Imágenes Docker (GHCR)
+# ====================
+tfv_backend_image = "ghcr.io/akaidmaru/muni-backend-deploy:latest"
+tfv_frontend_image = "ghcr.io/akaidmaru/muni-frontend-deploy:latest"
 
-# Imágenes publicadas en GHCR (usuario/org en minúsculas; deben coincidir con los workflows)
-tfv_backend_image  = "ghcr.io/tu-org/muni-backend:latest"
-tfv_frontend_image = "ghcr.io/tu-org/muni-frontend:latest"
+# ====================
+# Dominio (NUEVO)
+# ====================
+# Si configuras un dominio, se agregará automáticamente a CORS
+# Deja vacío ("") si solo usas la IP
+app_domain = "reddmar.com"  # o "" si no tienes dominio
 
-# Opcional
-# aws_region               = "us-east-1"
-# instance_type            = "t3.micro"
-# public_subnet_a_cidr     = "10.0.1.0/24"
-# public_subnet_b_cidr     = "10.0.2.0/24"
-# availability_zone_a      = "us-east-1a"
-# availability_zone_b      = "us-east-1b"
-# db_engine_version        = "16.4"
-# db_instance_class        = "db.t3.micro"
-# rds_publicly_accessible  = true
-# rds_ingress_cidr         = "0.0.0.0/0"
-# rds_allow_ipv6           = true
-# s3_bucket_suffix         = "app"
-# En Free Tier AWS: deja el default 0 o no definas db_backup_retention_period
-# db_backup_retention_period = 0
+# ====================
+# Opcional: Configuración de Red
+# ====================
+# vpc_cidr = "10.0.0.0/16"
+# public_subnet_a_cidr = "10.0.1.0/24"
+# public_subnet_b_cidr = "10.0.2.0/24"
+# rds_ingress_cidr = "0.0.0.0/0"  # Restringir en producción

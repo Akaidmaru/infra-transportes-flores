@@ -126,3 +126,9 @@ variable "tfv_frontend_image" {
   description = "Imagen Docker del front en GHCR (minúsculas), p. ej. ghcr.io/org/muni-frontend:latest"
   type        = string
 }
+
+variable "app_domain" {
+  description = "Dominio principal de la aplicación (ej: reddmar.com). Si está vacío, solo usa la IP"
+  type        = string
+  default     = ""
+}
