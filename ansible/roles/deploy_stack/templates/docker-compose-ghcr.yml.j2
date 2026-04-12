@@ -49,8 +49,9 @@ services:
     image: {{ tfv_frontend_image }}
     container_name: app-frontend
     restart: unless-stopped
+    # Solo localhost: evita choque con nginx/certbot en :80 del host. Nginx debe hacer proxy_pass a http://127.0.0.1:8080
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
     depends_on:
       - backend
     networks:

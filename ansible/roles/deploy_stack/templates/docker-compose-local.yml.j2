@@ -38,7 +38,7 @@ services:
         VITE_GOOGLE_MAPS_MAP_ID: "{{ tfv_google_maps_map_id | default('DEMO_MAP_ID') }}"
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
     depends_on:
       - backend
     networks:
