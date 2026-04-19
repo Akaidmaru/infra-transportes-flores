@@ -128,13 +128,13 @@ variable "tfv_frontend_image" {
 }
 
 variable "app_domain" {
-  description = "Dominio principal de la aplicación (ej: reddmar.com). Si está vacío, solo usa la IP"
+  description = "Dominio principal de la aplicación (ej: vectiaq.cl). Si está vacío, solo usa la IP"
   type        = string
   default     = ""
 }
 
 variable "app_frontend_url" {
-  description = "URL pública del SPA (emails de reset de contraseña, CORS de referencia). Ej: https://www.reddmar.com. Vacío = http://IP_EC2"
+  description = "URL pública del SPA (emails de reset de contraseña). Ej: https://www.vectiaq.cl. Vacío = http://IP_EC2"
   type        = string
   default     = ""
 }

@@ -28,10 +28,10 @@ tfv_frontend_image = "ghcr.io/akaidmaru/muni-frontend-deploy:latest"
 # ====================
 # Si configuras un dominio, se agregará automáticamente a CORS
 # Deja vacío ("") si solo usas la IP
-app_domain = "reddmar.com"  # o "" si no tienes dominio
+app_domain = "vectiaq.cl"  # o "" si no tienes dominio
 
 # URL pública del SPA (emails reset contraseña). Vacío = http://IP_EC2 (output Terraform)
-# app_frontend_url = "https://www.reddmar.com"
+# app_frontend_url = "https://www.vectiaq.cl"
 
 # ====================
 # Opcional: Configuración de Red

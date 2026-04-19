@@ -17,7 +17,7 @@ tfv_github_token: "ghp_tu_token_personal_de_github"
 
 # Opcional: Brevo (emails de verificación)
 # tfv_brevo_api_key: ""
-# tfv_brevo_sender_email: "noreply@tudominio.com"
+# tfv_brevo_sender_email: "noreply@vectiaq.cl"
 # tfv_brevo_sender_name: "Transportes Flores Vargas"
 
 # Opcional: Google Maps (rutas; front en build local también usa map ID)

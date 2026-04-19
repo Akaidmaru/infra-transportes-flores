@@ -157,7 +157,7 @@ El playbook instala dependencias base, Node (referencia), escribe **`/opt/app/.e
 
 ### 3.1 Secretos del workflow Deploy (repositorio infra)
 
-En GitHub → Settings → Secrets: **`CORS_ORIGIN`** (orígenes del SPA en producción, separados por comas, sin espacios; p. ej. `https://www.tudominio.com,https://tudominio.com`), **`FRONTEND_URL`** (misma URL pública del front para enlaces de email, p. ej. `https://www.tudominio.com`), **`VITE_API_BASE_URL`** va en el repo del **front** (build). Bucket S3: **`S3_BUCKET`** o **`AWS_S3_BUCKET`** (el workflow usa uno u otro). Ver también [nginx/reddmar.example.conf](nginx/reddmar.example.conf) para proxy TLS y WebSockets.
+En GitHub → Settings → Secrets: **`CORS_ORIGIN`** (orígenes del SPA, p. ej. `https://www.vectiaq.cl,https://vectiaq.cl`), **`FRONTEND_URL`** (p. ej. `https://www.vectiaq.cl`), **`VITE_API_BASE_URL`** en el repo del **front** (p. ej. `https://api.vectiaq.cl` si el API va detrás de Nginx en 443). Bucket S3: **`S3_BUCKET`** o **`AWS_S3_BUCKET`**. Ver [nginx/vectiaq.example.conf](nginx/vectiaq.example.conf). DNS de ejemplo: A `api`, `www`, apex → IP de la EC2 (p. ej. 44.212.48.142).
 
 ## 4. Puertos y URLs (demo HTTP)
 

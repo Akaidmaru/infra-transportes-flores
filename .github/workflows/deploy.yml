@@ -175,7 +175,7 @@ jobs:
           echo "- API: http://${{ secrets.EC2_HOST }}:3000" >> $GITHUB_STEP_SUMMARY
           echo "- Swagger: http://${{ secrets.EC2_HOST }}:3000/api-docs" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Secrets:** \`S3_BUCKET\` o \`AWS_S3_BUCKET\` (bucket S3). \`FRONTEND_URL\` (URL pública del SPA, p. ej. https://www.tudominio.com)." >> $GITHUB_STEP_SUMMARY
+          echo "**Secrets:** \`S3_BUCKET\` o \`AWS_S3_BUCKET\` (bucket S3). \`FRONTEND_URL\` (p. ej. https://www.vectiaq.cl). \`CORS_ORIGIN\` debe incluir https://www.vectiaq.cl y https://vectiaq.cl si usáis ese dominio." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Imágenes desplegadas:**" >> $GITHUB_STEP_SUMMARY
           echo "- Backend: \`${{ vars.BACKEND_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
