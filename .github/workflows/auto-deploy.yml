@@ -52,6 +52,7 @@ jobs:
                 REDIS_HOST: redis
                 REDIS_PORT: 6379
                 CORS_ORIGIN: "${{ secrets.CORS_ORIGIN }}"
+                FRONTEND_URL: "${{ secrets.FRONTEND_URL }}"
                 VERIFICATION_CODE_TTL: "600"
                 VERIFICATION_RATE_LIMIT_SECONDS: "60"
                 GOOGLE_MAPS_API_KEY: "${{ secrets.GOOGLE_MAPS_API_KEY }}"
@@ -61,7 +62,7 @@ jobs:
                 AWS_REGION: us-east-1
                 AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
                 AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-                AWS_S3_BUCKET: "${{ secrets.S3_BUCKET }}"
+                AWS_S3_BUCKET: "${{ secrets.S3_BUCKET != '' && secrets.S3_BUCKET || secrets.AWS_S3_BUCKET }}"
                 AWS_S3_SIGNED_URL_TTL: "3600"
               depends_on:
                 redis:
@@ -149,6 +150,7 @@ jobs:
           
           echo ""
           echo "✅ Deploy completed successfully!"
+          echo "Migraciones: el backend las aplica al arrancar (Dockerfile: prisma migrate deploy)."
           EOF
 
       - name: Generate deployment summary
@@ -162,6 +164,8 @@ jobs:
           echo "| Frontend | http://${{ secrets.EC2_HOST }} |" >> $GITHUB_STEP_SUMMARY
           echo "| API | http://${{ secrets.EC2_HOST }}:3000 |" >> $GITHUB_STEP_SUMMARY
           echo "| Swagger | http://${{ secrets.EC2_HOST }}:3000/api-docs |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Secrets:** \`S3_BUCKET\` o \`AWS_S3_BUCKET\`. \`FRONTEND_URL\` (URL pública del SPA)." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🐳 Imágenes Desplegadas" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

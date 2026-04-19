@@ -37,6 +37,7 @@ resource "local_file" "ansible_inventory" {
     tfv_backend_image   = var.tfv_backend_image
     tfv_frontend_image  = var.tfv_frontend_image
     app_domain          = var.app_domain
+    tfv_frontend_url    = var.app_frontend_url != "" ? var.app_frontend_url : "http://${aws_instance.production.public_ip}"
   })
   filename             = "../ansible/ansible_inventory"
   file_permission      = "0644"

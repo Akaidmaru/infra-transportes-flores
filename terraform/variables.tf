@@ -132,3 +132,9 @@ variable "app_domain" {
   type        = string
   default     = ""
 }
+
+variable "app_frontend_url" {
+  description = "URL pública del SPA (emails de reset de contraseña, CORS de referencia). Ej: https://www.reddmar.com. Vacío = http://IP_EC2"
+  type        = string
+  default     = ""
+}

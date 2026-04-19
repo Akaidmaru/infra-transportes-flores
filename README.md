@@ -155,17 +155,20 @@ El playbook instala dependencias base, Node (referencia), escribe **`/opt/app/.e
 2. **Front (Vite)**: en el repositorio del front, configura el variable **`VITE_API_BASE_URL`** (p. ej. `http://<IP_EC2>:3000`) igual que la URL pública del API (output `tfv_public_api_url` o el valor del inventario). Esa variable se usa **en el build** de la imagen.
 3. **Registro en la EC2**: si las imágenes GHCR son **privadas**, en el servidor hará falta `docker login ghcr.io` (token con permiso `read:packages`) antes de que `docker compose pull` funcione; si son **públicas**, no hace falta.
 
+### 3.1 Secretos del workflow Deploy (repositorio infra)
+
+En GitHub → Settings → Secrets: **`CORS_ORIGIN`** (orígenes del SPA en producción, separados por comas, sin espacios; p. ej. `https://www.tudominio.com,https://tudominio.com`), **`FRONTEND_URL`** (misma URL pública del front para enlaces de email, p. ej. `https://www.tudominio.com`), **`VITE_API_BASE_URL`** va en el repo del **front** (build). Bucket S3: **`S3_BUCKET`** o **`AWS_S3_BUCKET`** (el workflow usa uno u otro). Ver también [nginx/reddmar.example.conf](nginx/reddmar.example.conf) para proxy TLS y WebSockets.
+
 ## 4. Puertos y URLs (demo HTTP)
 
 | Servicio | Puerto en el host |
 |----------|-------------------|
-| Front (nginx) | **8080** |
-| API NestJS | **3000** |
+| Front (Docker → nginx interno) | **127.0.0.1:8080** (Nginx del sistema en **80/443** hace `proxy_pass` aquí) |
+| API NestJS | **3000** (p. ej. detrás de `api.` subdominio con TLS) |
 | SSH | **22** |
 
-- Front: `http://<IP_EC2>:8080`
-- API: `http://<IP_EC2>:3000`
-- CORS en el backend usa el origen del front (`http://<IP_EC2>:8080`), generado en el inventario.
+- Tras **terraform apply**, el inventario incluye **`tfv_frontend_url`** (o **`app_frontend_url`** en `terraform.tfvars`) para emails de reset y variable **`FRONTEND_URL`** en compose/Ansible.
+- El backend aplica **Prisma migrate** al arrancar el contenedor (Dockerfile).
 
 ## 5. Estructura del repositorio
 
