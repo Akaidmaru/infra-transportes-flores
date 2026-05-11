@@ -1,0 +1,241 @@
+name: Auto-Deploy Multi-Env
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Entorno destino"
+        required: true
+        type: choice
+        options:
+          - production
+          - dev
+          - test
+      component:
+        description: "Componente a desplegar"
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+      backend_image:
+        description: "Override backend image (opcional)"
+        required: false
+        type: string
+      frontend_image:
+        description: "Override frontend image (opcional)"
+        required: false
+        type: string
+  repository_dispatch:
+    types: [backend-published, frontend-published]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.environment || github.event.inputs.target_environment }}
+      CHANGED_COMPONENT: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.component || github.event.inputs.component }}
+      PAYLOAD_IMAGE: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.image || '' }}
+      BACKEND_IMAGE_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backend_image || '' }}
+      FRONTEND_IMAGE_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.frontend_image || '' }}
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v4
+
+      - name: Resolve environment config
+        env:
+          EC2_HOST_PRODUCTION: ${{ secrets.EC2_HOST_PRODUCTION }}
+          EC2_HOST_DEV: ${{ secrets.EC2_HOST_DEV }}
+          EC2_HOST_TEST: ${{ secrets.EC2_HOST_TEST }}
+          DB_USER_PRODUCTION: ${{ secrets.DB_USER_PRODUCTION }}
+          DB_USER_DEV: ${{ secrets.DB_USER_DEV }}
+          DB_USER_TEST: ${{ secrets.DB_USER_TEST }}
+          DB_PASSWORD_PRODUCTION: ${{ secrets.DB_PASSWORD_PRODUCTION }}
+          DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
+          DB_PASSWORD_TEST: ${{ secrets.DB_PASSWORD_TEST }}
+          RDS_HOST_PRODUCTION: ${{ secrets.RDS_HOST_PRODUCTION }}
+          RDS_HOST_DEV: ${{ secrets.RDS_HOST_DEV }}
+          RDS_HOST_TEST: ${{ secrets.RDS_HOST_TEST }}
+          RDS_PORT_PRODUCTION: ${{ secrets.RDS_PORT_PRODUCTION }}
+          RDS_PORT_DEV: ${{ secrets.RDS_PORT_DEV }}
+          RDS_PORT_TEST: ${{ secrets.RDS_PORT_TEST }}
+          RDS_DBNAME_PRODUCTION: ${{ secrets.RDS_DBNAME_PRODUCTION }}
+          RDS_DBNAME_DEV: ${{ secrets.RDS_DBNAME_DEV }}
+          RDS_DBNAME_TEST: ${{ secrets.RDS_DBNAME_TEST }}
+          FRONTEND_URL_PRODUCTION: ${{ secrets.FRONTEND_URL_PRODUCTION }}
+          FRONTEND_URL_DEV: ${{ secrets.FRONTEND_URL_DEV }}
+          FRONTEND_URL_TEST: ${{ secrets.FRONTEND_URL_TEST }}
+          CORS_ORIGIN_PRODUCTION: ${{ secrets.CORS_ORIGIN_PRODUCTION }}
+          CORS_ORIGIN_DEV: ${{ secrets.CORS_ORIGIN_DEV }}
+          CORS_ORIGIN_TEST: ${{ secrets.CORS_ORIGIN_TEST }}
+        run: |
+          set -euo pipefail
+          case "$TARGET_ENV" in
+            production)
+              echo "EC2_HOST=${EC2_HOST_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "DB_USER=${DB_USER_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "DB_PASSWORD=${DB_PASSWORD_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "RDS_HOST=${RDS_HOST_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "RDS_PORT=${RDS_PORT_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "RDS_DBNAME=${RDS_DBNAME_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "FRONTEND_URL=${FRONTEND_URL_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "CORS_ORIGIN=${CORS_ORIGIN_PRODUCTION}" >> "$GITHUB_ENV"
+              echo "BACKEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-backend:main" >> "$GITHUB_ENV"
+              echo "FRONTEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-front:main" >> "$GITHUB_ENV"
+              ;;
+            dev)
+              echo "EC2_HOST=${EC2_HOST_DEV}" >> "$GITHUB_ENV"
+              echo "DB_USER=${DB_USER_DEV}" >> "$GITHUB_ENV"
+              echo "DB_PASSWORD=${DB_PASSWORD_DEV}" >> "$GITHUB_ENV"
+              echo "RDS_HOST=${RDS_HOST_DEV}" >> "$GITHUB_ENV"
+              echo "RDS_PORT=${RDS_PORT_DEV}" >> "$GITHUB_ENV"
+              echo "RDS_DBNAME=${RDS_DBNAME_DEV}" >> "$GITHUB_ENV"
+              echo "FRONTEND_URL=${FRONTEND_URL_DEV}" >> "$GITHUB_ENV"
+              echo "CORS_ORIGIN=${CORS_ORIGIN_DEV}" >> "$GITHUB_ENV"
+              echo "BACKEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-backend:dev" >> "$GITHUB_ENV"
+              echo "FRONTEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-front:dev" >> "$GITHUB_ENV"
+              ;;
+            test)
+              echo "EC2_HOST=${EC2_HOST_TEST}" >> "$GITHUB_ENV"
+              echo "DB_USER=${DB_USER_TEST}" >> "$GITHUB_ENV"
+              echo "DB_PASSWORD=${DB_PASSWORD_TEST}" >> "$GITHUB_ENV"
+              echo "RDS_HOST=${RDS_HOST_TEST}" >> "$GITHUB_ENV"
+              echo "RDS_PORT=${RDS_PORT_TEST}" >> "$GITHUB_ENV"
+              echo "RDS_DBNAME=${RDS_DBNAME_TEST}" >> "$GITHUB_ENV"
+              echo "FRONTEND_URL=${FRONTEND_URL_TEST}" >> "$GITHUB_ENV"
+              echo "CORS_ORIGIN=${CORS_ORIGIN_TEST}" >> "$GITHUB_ENV"
+              echo "BACKEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-backend:dev" >> "$GITHUB_ENV"
+              echo "FRONTEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-front:refactor-gps-tracking" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown TARGET_ENV: $TARGET_ENV"
+              exit 1
+              ;;
+          esac
+
+      - name: Resolve image and service selection
+        run: |
+          set -euo pipefail
+          BACKEND_IMAGE="$BACKEND_IMAGE_DEFAULT"
+          FRONTEND_IMAGE="$FRONTEND_IMAGE_DEFAULT"
+
+          if [ -n "${BACKEND_IMAGE_OVERRIDE}" ]; then
+            BACKEND_IMAGE="$BACKEND_IMAGE_OVERRIDE"
+          fi
+          if [ -n "${FRONTEND_IMAGE_OVERRIDE}" ]; then
+            FRONTEND_IMAGE="$FRONTEND_IMAGE_OVERRIDE"
+          fi
+
+          if [ "$CHANGED_COMPONENT" = "backend" ] && [ -n "${PAYLOAD_IMAGE}" ]; then
+            BACKEND_IMAGE="$PAYLOAD_IMAGE"
+          fi
+          if [ "$CHANGED_COMPONENT" = "frontend" ] && [ -n "${PAYLOAD_IMAGE}" ]; then
+            FRONTEND_IMAGE="$PAYLOAD_IMAGE"
+          fi
+
+          case "$CHANGED_COMPONENT" in
+            backend) SERVICES="backend" ;;
+            frontend) SERVICES="frontend" ;;
+            *) SERVICES="backend frontend redis" ;;
+          esac
+
+          echo "BACKEND_IMAGE=$BACKEND_IMAGE" >> "$GITHUB_ENV"
+          echo "FRONTEND_IMAGE=$FRONTEND_IMAGE" >> "$GITHUB_ENV"
+          echo "SERVICES=$SERVICES" >> "$GITHUB_ENV"
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${EC2_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Create docker-compose.yml
+        run: |
+          cat > docker-compose.yml << COMPOSE_EOF
+          services:
+            backend:
+              image: ${BACKEND_IMAGE}
+              container_name: app-backend
+              restart: unless-stopped
+              ports:
+                - "3000:3000"
+              environment:
+                NODE_ENV: production
+                PORT: 3000
+                NODE_TLS_REJECT_UNAUTHORIZED: 0
+                DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${RDS_HOST}:${RDS_PORT}/${RDS_DBNAME}?schema=public&sslmode=require"
+                JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+                REDIS_URL: "redis://redis:6379"
+                REDIS_HOST: redis
+                REDIS_PORT: 6379
+                CORS_ORIGIN: "${CORS_ORIGIN}"
+                FRONTEND_URL: "${FRONTEND_URL}"
+                VERIFICATION_CODE_TTL: "600"
+                VERIFICATION_RATE_LIMIT_SECONDS: "60"
+                GOOGLE_MAPS_API_KEY: "${{ secrets.GOOGLE_MAPS_API_KEY }}"
+                BREVO_API_KEY: "${{ secrets.BREVO_API_KEY }}"
+                BREVO_SENDER_EMAIL: "${{ secrets.BREVO_SENDER_EMAIL }}"
+                BREVO_SENDER_NAME: "${{ secrets.BREVO_SENDER_NAME }}"
+                AWS_REGION: us-east-1
+                AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+                AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+                AWS_S3_BUCKET: "${{ secrets.S3_BUCKET != '' && secrets.S3_BUCKET || secrets.AWS_S3_BUCKET }}"
+                AWS_S3_SIGNED_URL_TTL: "3600"
+              depends_on:
+                redis:
+                  condition: service_healthy
+              networks:
+                - app-network
+
+            frontend:
+              image: ${FRONTEND_IMAGE}
+              container_name: app-frontend
+              restart: unless-stopped
+              ports:
+                - "127.0.0.1:8080:80"
+              depends_on:
+                - backend
+              networks:
+                - app-network
+
+            redis:
+              image: redis:7-alpine
+              container_name: app-redis
+              restart: unless-stopped
+              ports:
+                - "6379:6379"
+              networks:
+                - app-network
+              volumes:
+                - redis-data:/data
+
+          networks:
+            app-network:
+              driver: bridge
+
+          volumes:
+            redis-data:
+              driver: local
+          COMPOSE_EOF
+
+      - name: Copy docker-compose.yml to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${EC2_HOST}:/tmp/docker-compose.yml
+
+      - name: Deploy services on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << EOF
+          set -e
+          sudo mv /tmp/docker-compose.yml /opt/app/docker-compose.yml
+          sudo chown ubuntu:ubuntu /opt/app/docker-compose.yml
+          cd /opt/app
+          sudo docker compose pull ${SERVICES}
+          sudo docker compose up -d ${SERVICES}
+          sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+          EOF
