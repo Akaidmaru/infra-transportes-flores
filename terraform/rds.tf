@@ -7,17 +7,19 @@ resource "aws_db_subnet_group" "main" {
   }
 }
 
-resource "aws_db_instance" "main" {
-  identifier     = "tfv-produccion"
+resource "aws_db_instance" "env" {
+  for_each = var.environments
+
+  identifier     = "tfv-${each.key}"
   engine         = "postgres"
   engine_version = var.db_engine_version
-  instance_class = var.db_instance_class
+  instance_class = each.value.db_instance_class
 
-  allocated_storage = var.db_allocated_storage
+  allocated_storage = each.value.db_allocated_storage
   storage_type      = "gp3"
   storage_encrypted = true
 
-  db_name  = "tfvapp"
+  db_name  = each.value.db_name
   username = var.db_username
   password = var.db_password
 
@@ -34,6 +36,7 @@ resource "aws_db_instance" "main" {
   performance_insights_enabled = false
 
   tags = {
-    Name = "tfv-rds-produccion"
+    Name        = "tfv-rds-${each.key}"
+    Environment = each.key
   }
 }

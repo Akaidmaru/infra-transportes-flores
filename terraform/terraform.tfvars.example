@@ -13,25 +13,49 @@ ssh_pem_relative_dir = "keypair"      # Carpeta donde está el .pem
 db_username = "tfvadmin"
 db_password = "TU_PASSWORD_SEGURO_AQUI"  # CAMBIAR!
 db_engine_version = "16.4"
-db_instance_class = "db.t3.micro"
-db_allocated_storage = 20
 db_backup_retention_period = 0  # 0 para Free Tier
+
+# ====================
+# Entornos (EC2 + RDS)
+# ====================
+environments = {
+  production = {
+    ec2_instance_type    = "t3.micro"
+    db_instance_class    = "db.t3.micro"
+    db_allocated_storage = 20
+    db_name              = "tfvapp"
+    app_domain           = "vectiaq.cl"
+    app_frontend_url     = "https://www.vectiaq.cl"
+    backend_image        = "ghcr.io/luisavargas-9/muni-backend:main"
+    frontend_image       = "ghcr.io/luisavargas-9/muni-front:main"
+  }
+  dev = {
+    ec2_instance_type    = "t3.micro"
+    db_instance_class    = "db.t3.micro"
+    db_allocated_storage = 20
+    db_name              = "tfvappdev"
+    app_domain           = "dev.vectiaq.cl"
+    app_frontend_url     = "https://dev.vectiaq.cl"
+    backend_image        = "ghcr.io/luisavargas-9/muni-backend:dev"
+    frontend_image       = "ghcr.io/luisavargas-9/muni-front:dev"
+  }
+  test = {
+    ec2_instance_type    = "t3.micro"
+    db_instance_class    = "db.t3.micro"
+    db_allocated_storage = 20
+    db_name              = "tfvapptest"
+    app_domain           = "test.vectiaq.cl"
+    app_frontend_url     = "https://test.vectiaq.cl"
+    backend_image        = "ghcr.io/luisavargas-9/muni-backend:dev"
+    frontend_image       = "ghcr.io/luisavargas-9/muni-front:refactor-gps-tracking"
+  }
+}
 
 # ====================
 # Imágenes Docker (GHCR)
 # ====================
-tfv_backend_image = "ghcr.io/akaidmaru/muni-backend-deploy:latest"
-tfv_frontend_image = "ghcr.io/akaidmaru/muni-frontend-deploy:latest"
-
-# ====================
-# Dominio (NUEVO)
-# ====================
-# Si configuras un dominio, se agregará automáticamente a CORS
-# Deja vacío ("") si solo usas la IP
-app_domain = "vectiaq.cl"  # o "" si no tienes dominio
-
-# URL pública del SPA (emails reset contraseña). Vacío = http://IP_EC2 (output Terraform)
-# app_frontend_url = "https://www.vectiaq.cl"
+tfv_backend_image = "ghcr.io/luisavargas-9/muni-backend:main"
+tfv_frontend_image = "ghcr.io/luisavargas-9/muni-front:main"
 
 # ====================
 # Opcional: Configuración de Red
@@ -40,3 +64,4 @@ app_domain = "vectiaq.cl"  # o "" si no tienes dominio
 # public_subnet_a_cidr = "10.0.1.0/24"
 # public_subnet_b_cidr = "10.0.2.0/24"
 # rds_ingress_cidr = "0.0.0.0/0"  # Restringir en producción
+# rds_publicly_accessible = true

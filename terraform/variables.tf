@@ -45,16 +45,56 @@ variable "availability_zone_b" {
   default     = "us-east-1b"
 }
 
-variable "instance_type" {
-  description = "EC2. En cuentas solo Free Tier suele aceptarse t3.micro (t2.micro a veces ya no es elegible)."
-  type        = string
-  default     = "t3.micro"
-}
-
 variable "ami_id" {
   description = "AMI Ubuntu (us-east-1)"
   type        = string
   default     = "ami-0866a3c8686eaeeba"
+}
+
+variable "environments" {
+  description = "Configuración por entorno (EC2 + RDS) para production/dev/test"
+  type = map(object({
+    ec2_instance_type    = string
+    db_instance_class    = string
+    db_allocated_storage = number
+    db_name              = string
+    app_domain           = optional(string, "")
+    app_frontend_url     = optional(string, "")
+    backend_image        = optional(string, "")
+    frontend_image       = optional(string, "")
+  }))
+  default = {
+    production = {
+      ec2_instance_type    = "t3.micro"
+      db_instance_class    = "db.t3.micro"
+      db_allocated_storage = 20
+      db_name              = "tfvapp"
+      app_domain           = ""
+      app_frontend_url     = ""
+      backend_image        = ""
+      frontend_image       = ""
+    }
+    dev = {
+      ec2_instance_type    = "t3.micro"
+      db_instance_class    = "db.t3.micro"
+      db_allocated_storage = 20
+      db_name              = "tfvappdev"
+      app_domain           = ""
+      app_frontend_url     = ""
+      backend_image        = ""
+      frontend_image       = ""
+    }
+    test = {
+      ec2_instance_type    = "t3.micro"
+      db_instance_class    = "db.t3.micro"
+      db_allocated_storage = 20
+      db_name              = "tfvapptest"
+      app_domain           = ""
+      app_frontend_url     = ""
+      backend_image        = ""
+      frontend_image       = ""
+    }
+  }
 }
 
 variable "s3_bucket_suffix" {
@@ -79,18 +119,6 @@ variable "db_engine_version" {
   description = "Versión del motor PostgreSQL"
   type        = string
   default     = "16.4"
-}
-
-variable "db_allocated_storage" {
-  description = "Almacenamiento RDS (GB)"
-  type        = number
-  default     = 20
-}
-
-variable "db_instance_class" {
-  description = "Clase de instancia RDS (p. ej. db.t3.micro)"
-  type        = string
-  default     = "db.t3.micro"
 }
 
 variable "db_backup_retention_period" {
@@ -127,14 +155,34 @@ variable "tfv_frontend_image" {
   type        = string
 }
 
-variable "app_domain" {
-  description = "Dominio principal de la aplicación (ej: vectiaq.cl). Si está vacío, solo usa la IP"
+# Compatibilidad con terraform.tfvars anterior (ya no se usan en el modelo por entorno).
+variable "instance_type" {
+  description = "DEPRECADO: usar environments.<env>.ec2_instance_type"
   type        = string
-  default     = ""
+  default     = null
+}
+
+variable "db_instance_class" {
+  description = "DEPRECADO: usar environments.<env>.db_instance_class"
+  type        = string
+  default     = null
+}
+
+variable "db_allocated_storage" {
+  description = "DEPRECADO: usar environments.<env>.db_allocated_storage"
+  type        = number
+  default     = null
+}
+
+variable "app_domain" {
+  description = "DEPRECADO: usar environments.<env>.app_domain"
+  type        = string
+  default     = null
 }
 
 variable "app_frontend_url" {
-  description = "URL pública del SPA (emails de reset de contraseña). Ej: https://www.vectiaq.cl. Vacío = http://IP_EC2"
+  description = "DEPRECADO: usar environments.<env>.app_frontend_url"
   type        = string
-  default     = ""
+  default     = null
 }
+

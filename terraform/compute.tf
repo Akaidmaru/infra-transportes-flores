@@ -1,6 +1,8 @@
-resource "aws_instance" "production" {
+resource "aws_instance" "env" {
+  for_each = var.environments
+
   ami                         = var.ami_id
-  instance_type               = var.instance_type
+  instance_type               = each.value.ec2_instance_type
   subnet_id                   = aws_subnet.public_a.id
   availability_zone           = var.availability_zone_a
   vpc_security_group_ids      = [aws_security_group.ec2.id]
@@ -20,24 +22,40 @@ resource "aws_instance" "production" {
   ]
 
   tags = {
-    Name        = "tfv-ec2-produccion"
-    Environment = "demo"
+    Name        = "tfv-ec2-${each.key}"
+    Environment = each.key
+  }
+}
+
+locals {
+  ansible_environment_hosts = {
+    for env, instance in aws_instance.env : env => {
+      public_ip          = instance.public_ip
+      ssh_user           = "ubuntu"
+      rds_address        = aws_db_instance.env[env].address
+      rds_port           = tostring(aws_db_instance.env[env].port)
+      db_name            = aws_db_instance.env[env].db_name
+      s3_bucket          = aws_s3_bucket.app.id
+      tfv_backend_image  = trimspace(var.environments[env].backend_image) != "" ? var.environments[env].backend_image : var.tfv_backend_image
+      tfv_frontend_image = trimspace(var.environments[env].frontend_image) != "" ? var.environments[env].frontend_image : var.tfv_frontend_image
+      tfv_public_api_url = "http://${instance.public_ip}:3000"
+      tfv_frontend_url   = trimspace(var.environments[env].app_frontend_url) != "" ? var.environments[env].app_frontend_url : "http://${instance.public_ip}"
+      tfv_cors_origin = join(",", compact(concat(
+        ["http://${instance.public_ip}"],
+        trimspace(var.environments[env].app_domain) != "" ? [
+          "http://${var.environments[env].app_domain}",
+          "https://${var.environments[env].app_domain}",
+          "https://www.${var.environments[env].app_domain}"
+        ] : []
+      )))
+    }
   }
 }
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/ansible_inventory.tpl", {
-    production_ip       = aws_instance.production.public_ip
-    ssh_user            = "ubuntu"
-    private_key_path    = "../${var.ssh_pem_relative_dir}/${var.keypair_name}.pem"
-    rds_address         = aws_db_instance.main.address
-    rds_port            = tostring(aws_db_instance.main.port)
-    db_name             = aws_db_instance.main.db_name
-    s3_bucket           = aws_s3_bucket.app.id
-    tfv_backend_image   = var.tfv_backend_image
-    tfv_frontend_image  = var.tfv_frontend_image
-    app_domain          = var.app_domain
-    tfv_frontend_url    = var.app_frontend_url != "" ? var.app_frontend_url : "http://${aws_instance.production.public_ip}"
+    environment_hosts = local.ansible_environment_hosts
+    private_key_path  = "../${var.ssh_pem_relative_dir}/${var.keypair_name}.pem"
   })
   filename             = "../ansible/ansible_inventory"
   file_permission      = "0644"

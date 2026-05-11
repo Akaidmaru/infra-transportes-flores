@@ -47,13 +47,13 @@ Este repositorio define la infraestructura en **AWS** con **Terraform** y el apr
 | Recurso | Rol |
 |--------|-----|
 | **VPC, subnets, IGW, rutas** | Red aislada con salida a Internet |
-| **EC2** (`t3.micro` por defecto) | Servidor donde corren Docker, front (puerto 8080) y API (3000) |
-| **RDS PostgreSQL** | Base de datos gestionada |
+| **EC2 x entorno** (`production`, `dev`, `test`) | Servidor donde corren Docker, front (puerto 8080) y API (3000) |
+| **RDS PostgreSQL x entorno** | Base de datos gestionada por cada entorno |
 | **S3** | Almacenamiento de objetos (nombre incluye el ID de cuenta) |
 | **Security groups** | SSH 22, HTTP/S, 8080, 3000 en la EC2; Postgres desde la EC2 hacia RDS |
 | **IAM** | Rol/perfil para que la EC2 acceda al bucket S3 |
 
-Terraform también genera el fichero **`ansible/ansible_inventory`** con la IP pública, datos de RDS, bucket S3, URLs de API/CORS e imágenes **GHCR** definidas en `terraform.tfvars`.
+Terraform también genera el fichero **`ansible/ansible_inventory`** con grupos `production`, `dev` y `test`, cada uno con su IP pública, datos de RDS, bucket S3, URLs de API/CORS e imágenes **GHCR** definidas en `terraform.tfvars`.
 
 ## Prerrequisitos en tu máquina
 
@@ -77,7 +77,7 @@ Edita **`terraform.tfvars`** como mínimo:
 - **`db_password`**: contraseña del usuario maestro de RDS.
 - **`tfv_backend_image`** y **`tfv_frontend_image`**: URIs en **GHCR** en minúsculas (deben coincidir con lo que publiquen los workflows de GitHub Actions de los repos del backend y del front).
 
-Opcional: `aws_region`, `instance_type` (en cuentas Free Tier recientes suele usarse `t3.micro`), `db_backup_retention_period` (en Free Tier a menudo `0`).
+Opcional: `aws_region`, `db_backup_retention_period` y ajustes por entorno dentro de `environments` (`ec2_instance_type`, `db_instance_class`, `db_allocated_storage`, `db_name`, `app_domain`, `app_frontend_url`).
 
 ### 1.2 Despliegue
 
@@ -89,9 +89,9 @@ terraform apply
 
 Al terminar, anota los **outputs**:
 
-- `ec2_public_ip` — SSH y URLs de demo
-- `tfv_public_api_url` / `tfv_frontend_url` — mismas bases que inyecta el inventario
-- `rds_endpoint`, `rds_port`, `rds_database_name`
+- `ec2_public_ip` — mapa de IPs por entorno
+- `tfv_public_api_url` / `tfv_frontend_url` — mapas de URLs por entorno (mismos valores que inyecta el inventario)
+- `rds_endpoint`, `rds_port`, `rds_database_name` — mapas por entorno
 - `s3_bucket_name`
 
 Tras cada `apply` que cambie la IP o los datos de RDS, se regenera **`../ansible/ansible_inventory`**.
@@ -145,6 +145,14 @@ Desde el directorio **`ansible/`**:
 
 ```bash
 ansible-playbook -i ansible_inventory ec2provisioning.yml
+```
+
+Para desplegar un entorno específico:
+
+```bash
+ansible-playbook -i ansible_inventory ec2provisioning.yml -e tfv_target_group=dev
+ansible-playbook -i ansible_inventory ec2provisioning.yml -e tfv_target_group=test
+ansible-playbook -i ansible_inventory ec2provisioning.yml -e tfv_target_group=production
 ```
 
 El playbook instala dependencias base, Node (referencia), escribe **`/opt/app/.env`**, instala Docker, copia **`docker-compose.yml`** y ejecuta **`docker compose pull && up`**.

@@ -2,7 +2,7 @@
 # Transportes Flores Vargas — runtime solo Node.js: Vue + Nest (TypeScript/JavaScript). Sin Java.
 # Inventario: terraform apply → ansible_inventory. Secretos: vault.yml
 - name: Aprovisionar EC2 para Vue + Nest (Docker, Node LTS, .env)
-  hosts: production
+  hosts: "{{ tfv_target_group | default('production') }}"
   vars_files:
     - vault.yml
   become: true

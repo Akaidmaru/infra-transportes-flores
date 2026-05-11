@@ -1,0 +1,17 @@
+---
+# Valores base para entorno dev. Variables dinámicas (IP, RDS, imágenes, URLs)
+# se cargan desde ansible_inventory generado por Terraform.
+aws_region: us-east-1
+nodejs_major_version: "20"
+
+# TTL del código de verificación (segundos)
+tfv_verification_code_ttl: 600
+tfv_verification_rate_limit_seconds: 60
+tfv_aws_s3_signed_url_ttl: 3600
+
+# URLs de repositorios Git (referencia)
+tfv_backend_repo: "https://github.com/Akaidmaru/Muni-backend-deploy.git"
+tfv_backend_branch: "feature/JMMB17"
+
+tfv_frontend_repo: "https://github.com/Akaidmaru/Muni-frontend-deploy.git"
+tfv_frontend_branch: "refactor/structure"

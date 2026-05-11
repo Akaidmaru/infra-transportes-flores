@@ -46,6 +46,7 @@ services:
       start_period: 40s
       retries: 3
 
+  # Imagen GHCR del front: VITE_API_BASE_URL quedó fijada en el build; debe ser la URL pública del API (misma que usa el socket).
   frontend:
     image: {{ tfv_frontend_image }}
     container_name: app-frontend
