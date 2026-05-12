@@ -29,7 +29,7 @@
 - name: Credenciales ya funcionan (configuradas manualmente)
   ansible.builtin.debug:
     msg: "✓ Credenciales Git ya configuradas y funcionando"
-  when: git_test_existing is defined and git_test_existing.rc == 0
+  when: (git_test_existing.rc | default(1)) == 0
 
 - name: Crear/actualizar credencial de GitHub desde vault
   ansible.builtin.copy:
@@ -39,7 +39,7 @@
     group: ubuntu
     mode: "0600"
   become: true
-  when: git_test_existing is not defined or git_test_existing.rc != 0
+  when: (git_test_existing.rc | default(1)) != 0
 
 - name: Configurar Git para usar credenciales
   ansible.builtin.shell:
