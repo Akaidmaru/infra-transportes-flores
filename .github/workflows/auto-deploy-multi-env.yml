@@ -212,6 +212,12 @@ jobs:
                 - "6379:6379"
               networks:
                 - app-network
+              healthcheck:
+                test: ["CMD", "redis-cli", "ping"]
+                interval: 10s
+                timeout: 3s
+                start_period: 5s
+                retries: 5
               volumes:
                 - redis-data:/data
 
@@ -232,9 +238,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} << EOF
           set -e
+          sudo mkdir -p /opt/app
           sudo mv /tmp/docker-compose.yml /opt/app/docker-compose.yml
           sudo chown ubuntu:ubuntu /opt/app/docker-compose.yml
           cd /opt/app
+          sudo docker compose up -d redis
           sudo docker compose pull ${SERVICES}
           sudo docker compose up -d ${SERVICES}
           sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
