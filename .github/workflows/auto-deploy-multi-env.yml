@@ -100,7 +100,7 @@ jobs:
               echo "CORS_ORIGIN=${CORS_ORIGIN_DEV}" >> "$GITHUB_ENV"
               echo "BACKEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-backend:dev" >> "$GITHUB_ENV"
               echo "FRONTEND_IMAGE_DEFAULT=ghcr.io/luisavargas-9/muni-front:dev" >> "$GITHUB_ENV"
-              echo "FRONTEND_PORT_BIND=127.0.0.1:8080:80" >> "$GITHUB_ENV"
+              echo "FRONTEND_PORT_BIND=80:80" >> "$GITHUB_ENV"
               ;;
             test)
               echo "EC2_HOST=${EC2_HOST_TEST}" >> "$GITHUB_ENV"
