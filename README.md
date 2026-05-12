@@ -10,8 +10,7 @@ Este repositorio define la infraestructura en **AWS** con **Terraform** y el apr
 
 ## 📚 Guías de despliegue
 
-- **[DEPLOY-GHCR.md](DEPLOY-GHCR.md)**: Deploy usando GitHub Container Registry ⚡ **RECOMENDADO**
-- **[DEPLOY-MANUAL-EC2.md](DEPLOY-MANUAL-EC2.md)**: Deploy manual compilando en EC2
+- Deploy automatizado multi-entorno por GitHub Actions (`.github/workflows/auto-deploy-multi-env.yml`).
 
 ## Qué se crea en AWS
 
