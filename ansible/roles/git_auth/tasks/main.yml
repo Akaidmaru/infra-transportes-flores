@@ -7,6 +7,7 @@
     cmd: git config --global --get credential.helper
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_helper
   ignore_errors: true
 
@@ -15,6 +16,7 @@
     path: /home/ubuntu/.git-credentials
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: creds_file
 
 - name: Probar acceso a GitHub con credenciales existentes
@@ -22,6 +24,7 @@
     cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_test_existing
   ignore_errors: true
   when: creds_file.stat.exists and creds_file.stat.size > 0
@@ -39,6 +42,7 @@
     group: ubuntu
     mode: "0600"
   become: true
+  become_flags: "-H"
   when: (git_test_existing.rc | default(1)) != 0
 
 - name: Configurar Git para usar credenciales
@@ -46,6 +50,7 @@
     cmd: git config --global credential.helper store
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   when: git_helper.rc != 0 or git_helper.stdout != 'store'
 
 - name: Verificar acceso final a GitHub
@@ -53,6 +58,7 @@
     cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_test_final
 
 - name: Mostrar resultado de verificación GitHub
