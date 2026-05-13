@@ -247,6 +247,9 @@ jobs:
           cd /opt/app
           sudo docker compose up -d redis
           sudo docker compose pull ${SERVICES}
+          for svc in ${SERVICES}; do
+            sudo docker compose rm -sf "\$svc" || true
+          done
           sudo docker compose up -d ${SERVICES}
           sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           EOF
