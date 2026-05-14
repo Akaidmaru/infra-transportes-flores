@@ -42,6 +42,8 @@ Este repositorio define la infraestructura en **AWS** con **Terraform** y el apr
 
 **Recomendación**: Usa **FLUJO-AUTOMATIZADO** para desarrollo diario.
 
+- Deploy automatizado multi-entorno por GitHub Actions (`.github/workflows/auto-deploy-multi-env.yml`) — ver repo origen / documentación del workflow si lo añades aquí.
+
 ## Qué se crea en AWS
 
 | Recurso | Rol |

@@ -10,6 +10,24 @@
   ansible.builtin.debug:
     msg: "Docker version: {{ docker_check.stdout }}"
 
+- name: Validar credenciales GHCR en vault
+  ansible.builtin.assert:
+    that:
+      - tfv_github_username is defined
+      - tfv_github_username | length > 0
+      - tfv_github_token is defined
+      - tfv_github_token | length > 0
+    fail_msg: >-
+      Faltan tfv_github_username o tfv_github_token en vault.yml.
+      Se necesitan para docker login ghcr.io antes de docker compose pull.
+
+- name: Login a GHCR
+  ansible.builtin.shell:
+    cmd: echo "{{ tfv_github_token }}" | docker login ghcr.io -u "{{ tfv_github_username }}" --password-stdin
+    executable: /bin/bash
+  become: true
+  no_log: true
+
 - name: Actualizar docker-compose.yml para usar imágenes GHCR
   ansible.builtin.template:
     src: docker-compose-ghcr.yml.j2

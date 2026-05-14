@@ -7,6 +7,7 @@
     cmd: git config --global --get credential.helper
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_helper
   ignore_errors: true
 
@@ -15,6 +16,7 @@
     path: /home/ubuntu/.git-credentials
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: creds_file
 
 - name: Probar acceso a GitHub con credenciales existentes
@@ -22,6 +24,7 @@
     cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_test_existing
   ignore_errors: true
   when: creds_file.stat.exists and creds_file.stat.size > 0
@@ -29,7 +32,7 @@
 - name: Credenciales ya funcionan (configuradas manualmente)
   ansible.builtin.debug:
     msg: "✓ Credenciales Git ya configuradas y funcionando"
-  when: git_test_existing is defined and git_test_existing.rc == 0
+  when: (git_test_existing.rc | default(1)) == 0
 
 - name: Crear/actualizar credencial de GitHub desde vault
   ansible.builtin.copy:
@@ -39,13 +42,15 @@
     group: ubuntu
     mode: "0600"
   become: true
-  when: git_test_existing is not defined or git_test_existing.rc != 0
+  become_flags: "-H"
+  when: (git_test_existing.rc | default(1)) != 0
 
 - name: Configurar Git para usar credenciales
   ansible.builtin.shell:
     cmd: git config --global credential.helper store
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   when: git_helper.rc != 0 or git_helper.stdout != 'store'
 
 - name: Verificar acceso final a GitHub
@@ -53,6 +58,7 @@
     cmd: git ls-remote https://github.com/LuisaVargas-9/Muni-backend.git HEAD
   become: true
   become_user: ubuntu
+  become_flags: "-H"
   register: git_test_final
 
 - name: Mostrar resultado de verificación GitHub

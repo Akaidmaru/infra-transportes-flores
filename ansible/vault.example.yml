@@ -15,6 +15,9 @@ tfv_jwt_secret: "genera_un_secreto_largo_aleatorio"
 tfv_github_username: "tu-usuario-github"
 tfv_github_token: "ghp_tu_token_personal_de_github"
 
+# El mismo tfv_github_username/tfv_github_token también se usa para docker login ghcr.io
+# (el token debe incluir permiso read:packages para pull de imágenes privadas).
+
 # Opcional: Brevo (emails de verificación)
 # tfv_brevo_api_key: ""
 # tfv_brevo_sender_email: "noreply@vectiaq.cl"
