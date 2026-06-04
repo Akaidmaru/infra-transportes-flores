@@ -159,6 +159,9 @@ jobs:
           ssh-keyscan -H "${EC2_HOST}" >> ~/.ssh/known_hosts
 
       - name: Create docker-compose.yml
+        env:
+          VERIFICATION_CODE_TTL: ${{ secrets.VERIFICATION_CODE_TTL != '' && secrets.VERIFICATION_CODE_TTL || '600' }}
+          VERIFICATION_RATE_LIMIT_SECONDS: ${{ secrets.VERIFICATION_RATE_LIMIT_SECONDS != '' && secrets.VERIFICATION_RATE_LIMIT_SECONDS || '60' }}
         run: |
           cat > docker-compose.yml << COMPOSE_EOF
           services:
@@ -179,8 +182,8 @@ jobs:
                 REDIS_PORT: 6379
                 CORS_ORIGIN: "${CORS_ORIGIN}"
                 FRONTEND_URL: "${FRONTEND_URL}"
-                VERIFICATION_CODE_TTL: "600"
-                VERIFICATION_RATE_LIMIT_SECONDS: "60"
+                VERIFICATION_CODE_TTL: "${VERIFICATION_CODE_TTL}"
+                VERIFICATION_RATE_LIMIT_SECONDS: "${VERIFICATION_RATE_LIMIT_SECONDS}"
                 GOOGLE_MAPS_API_KEY: "${{ secrets.GOOGLE_MAPS_API_KEY }}"
                 BREVO_API_KEY: "${{ secrets.BREVO_API_KEY }}"
                 BREVO_SENDER_EMAIL: "${{ secrets.BREVO_SENDER_EMAIL }}"
@@ -253,3 +256,16 @@ jobs:
           sudo docker compose up -d ${SERVICES}
           sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
           EOF
+
+      - name: Verify verification env vars on EC2
+        if: contains(env.SERVICES, 'backend')
+        env:
+          VERIFICATION_CODE_TTL: ${{ secrets.VERIFICATION_CODE_TTL != '' && secrets.VERIFICATION_CODE_TTL || '600' }}
+          VERIFICATION_RATE_LIMIT_SECONDS: ${{ secrets.VERIFICATION_RATE_LIMIT_SECONDS != '' && secrets.VERIFICATION_RATE_LIMIT_SECONDS || '60' }}
+        run: |
+          set -euo pipefail
+          OUT=$(ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@${EC2_HOST} \
+            'sudo docker exec app-backend printenv | grep -E "^VERIFICATION_" | sort')
+          echo "$OUT"
+          echo "$OUT" | grep -q "^VERIFICATION_CODE_TTL=${VERIFICATION_CODE_TTL}$"
+          echo "$OUT" | grep -q "^VERIFICATION_RATE_LIMIT_SECONDS=${VERIFICATION_RATE_LIMIT_SECONDS}$"
